@@ -453,6 +453,24 @@ const NO_ARTIST_FALLBACK_TITLES = [
   "K-Pop Just Had Its Biggest Week Yet",
   "The Entertainment Story That's Taking Over Timelines",
   "This K-Culture Moment Is Bigger Than You Think",
+  "The K-Pop Update That Changed the Conversation",
+  "Why This Week's K-Pop News Hits Different",
+  "The Headline Dominating K-Pop Fan Feeds Right Now",
+  "Here's What Happened in K-Pop While You Were Sleeping",
+  "The K-Entertainment Dispatch: This Week's Top Story",
+  "VOLT Briefing: The K-Pop News That Matters Most",
+  "K-Pop's Week in Review: The Stories Worth Your Time",
+  "The K-Culture Moment Everyone Should Be Watching",
+  "Inside the K-Pop Move Nobody Saw Coming",
+  "The Breaking News Shaking Up K-Pop Fan Communities",
+  "What the Latest K-Pop Buzz Really Means",
+  "A Major Shift Is Happening in K-Pop Right Now",
+  "K-Pop's Most Talked-About Story This Week",
+  "VOLT Analysis: What's Driving This Week's K-Pop Headlines",
+  "The One K-Pop Story You Can't Afford to Miss",
+  "Why K-Pop Fans Are Losing Their Minds Over This",
+  "The Surprising K-Pop Development Making Headlines",
+  "Everything You Need to Know About K-Pop's Biggest Story",
 ];
 
 // ---- Helper: pick random item from array ----
@@ -707,6 +725,19 @@ function parseRssFeed(xml, sourceName) {
     }
 
     if (!title || !link) continue;
+
+    // Content filter: exclude non-K-pop/K-culture articles
+    const lowerTitle = title.toLowerCase();
+    const lowerLink = link.toLowerCase();
+    const allText = `${lowerTitle} ${lowerLink} ${categories.join(' ').toLowerCase()}`;
+    const BLOCKED_KEYWORDS = [
+      'esports', 'e-sports', 'gaming', 'gamer', 'fortnite', 'valorant',
+      'league of legends', 'dota', 'overwatch', 'tournament', 'cheating',
+      'counter-strike', 'csgo', 'minecraft', 'twitch streamer',
+      'call of duty', 'apex legends', 'pubg',
+    ];
+    const isBlocked = BLOCKED_KEYWORDS.some(kw => allText.includes(kw));
+    if (isBlocked) continue;
 
     articles.push({
       title,
@@ -1016,23 +1047,39 @@ function rewriteArticleBody(articleContent, title) {
   const inlineImages = (articleContent?.images || []).slice(1, 4); // Up to 3 inline images
 
   const paragraphs = [];
+  // Track all used text to prevent any paragraph from appearing twice
+  const usedTexts = new Set();
+  const pickUnique = (arr) => {
+    const available = arr.filter(t => !usedTexts.has(t));
+    if (available.length === 0) return arr[Math.floor(Math.random() * arr.length)];
+    const picked = available[Math.floor(Math.random() * available.length)];
+    usedTexts.add(picked);
+    return picked;
+  };
+  const shuffleAndPickUnique = (arr, n) => {
+    const available = arr.filter(t => !usedTexts.has(t));
+    const shuffled = [...available].sort(() => Math.random() - 0.5);
+    const picked = shuffled.slice(0, Math.min(n, shuffled.length));
+    for (const p of picked) usedTexts.add(p);
+    return picked;
+  };
 
   if (artist) {
     const templates = BODY_TEMPLATES[topic] || BODY_TEMPLATES.general;
     const sub = (text) => text.replace(/\{artist\}/g, artist);
 
     // 1. Opening (1 paragraph)
-    paragraphs.push({ type: 'intro', text: sub(pickRandom(templates.opening)) });
+    paragraphs.push({ type: 'intro', text: sub(pickUnique(templates.opening)) });
 
     // 2. Background (1-2 paragraphs)
     const bgCount = targetParagraphs >= 10 ? 2 : 1;
-    for (const bg of shuffleAndPick(SHARED_PARAGRAPHS.background, bgCount)) {
+    for (const bg of shuffleAndPickUnique(SHARED_PARAGRAPHS.background, bgCount)) {
       paragraphs.push({ type: 'body', text: sub(bg) });
     }
 
     // 3. Analysis - topic specific (2-3 paragraphs)
     const analysisCount = targetParagraphs >= 10 ? 3 : 2;
-    for (const a of shuffleAndPick(templates.analysis, analysisCount)) {
+    for (const a of shuffleAndPickUnique(templates.analysis, analysisCount)) {
       paragraphs.push({ type: 'body', text: sub(a) });
     }
 
@@ -1043,13 +1090,13 @@ function rewriteArticleBody(articleContent, title) {
 
     // 4. Detail (1-2 paragraphs)
     const detailCount = targetParagraphs >= 10 ? 2 : 1;
-    for (const d of shuffleAndPick(SHARED_PARAGRAPHS.detail, detailCount)) {
+    for (const d of shuffleAndPickUnique(SHARED_PARAGRAPHS.detail, detailCount)) {
       paragraphs.push({ type: 'body', text: sub(d) });
     }
 
     // 5. Reaction (1-2 paragraphs)
     const reactionCount = targetParagraphs >= 10 ? 2 : 1;
-    for (const r of shuffleAndPick(SHARED_PARAGRAPHS.reaction, reactionCount)) {
+    for (const r of shuffleAndPickUnique(SHARED_PARAGRAPHS.reaction, reactionCount)) {
       paragraphs.push({ type: 'body', text: sub(r) });
     }
 
@@ -1059,20 +1106,20 @@ function rewriteArticleBody(articleContent, title) {
     }
 
     // 6. Impact (1 paragraph)
-    paragraphs.push({ type: 'body', text: sub(pickRandom(SHARED_PARAGRAPHS.impact)) });
+    paragraphs.push({ type: 'body', text: sub(pickUnique(SHARED_PARAGRAPHS.impact)) });
 
     // 7. Closing (1 paragraph)
-    paragraphs.push({ type: 'closing', text: sub(pickRandom(templates.closing)) });
+    paragraphs.push({ type: 'closing', text: sub(pickUnique(templates.closing)) });
 
   } else {
     // No artist — use generic + noArtist shared paragraphs
-    paragraphs.push({ type: 'intro', text: pickRandom(NO_ARTIST_BODY.opening) });
+    paragraphs.push({ type: 'intro', text: pickUnique(NO_ARTIST_BODY.opening) });
 
-    for (const bg of shuffleAndPick(SHARED_PARAGRAPHS.noArtist.background, 2)) {
+    for (const bg of shuffleAndPickUnique(SHARED_PARAGRAPHS.noArtist.background, 2)) {
       paragraphs.push({ type: 'body', text: bg });
     }
 
-    for (const a of shuffleAndPick(NO_ARTIST_BODY.analysis, 2)) {
+    for (const a of shuffleAndPickUnique(NO_ARTIST_BODY.analysis, 2)) {
       paragraphs.push({ type: 'body', text: a });
     }
 
@@ -1080,11 +1127,11 @@ function rewriteArticleBody(articleContent, title) {
       paragraphs.push({ type: 'image', src: inlineImages[0] });
     }
 
-    for (const d of shuffleAndPick(SHARED_PARAGRAPHS.noArtist.detail, 2)) {
+    for (const d of shuffleAndPickUnique(SHARED_PARAGRAPHS.noArtist.detail, 2)) {
       paragraphs.push({ type: 'body', text: d });
     }
 
-    for (const r of shuffleAndPick(SHARED_PARAGRAPHS.noArtist.reaction, 1)) {
+    for (const r of shuffleAndPickUnique(SHARED_PARAGRAPHS.noArtist.reaction, 1)) {
       paragraphs.push({ type: 'body', text: r });
     }
 
@@ -1092,9 +1139,9 @@ function rewriteArticleBody(articleContent, title) {
       paragraphs.push({ type: 'image', src: inlineImages[1] });
     }
 
-    paragraphs.push({ type: 'body', text: pickRandom(SHARED_PARAGRAPHS.noArtist.impact) });
+    paragraphs.push({ type: 'body', text: pickUnique(SHARED_PARAGRAPHS.noArtist.impact) });
 
-    paragraphs.push({ type: 'closing', text: pickRandom(NO_ARTIST_BODY.closing) });
+    paragraphs.push({ type: 'closing', text: pickUnique(NO_ARTIST_BODY.closing) });
   }
 
   return { paragraphs };
@@ -1333,10 +1380,11 @@ async function generateArticlePages(allArticles, usedArticles) {
     // Fill template
     let html = articleTemplate
       .replace(/\{\{ARTICLE_TITLE\}\}/g, escapeHtml(article.title))
-      .replace('{{ARTICLE_DESCRIPTION}}', escapeHtml(article.title).slice(0, 160))
+      .replace(/\{\{ARTICLE_DESCRIPTION\}\}/g, escapeHtml(article.title).slice(0, 160))
       .replace('{{ARTICLE_IMAGE}}', escapeHtml(heroImgSrc))
       .replace('{{ARTICLE_CATEGORY}}', escapeHtml(displayCategory(article.topic || 'general')))
       .replace('{{ARTICLE_DATE}}', escapeHtml(article.formattedDate))
+      .replace(/\{\{ARTICLE_SOURCE\}\}/g, escapeHtml(article.source || 'K-Pop Source'))
       .replace('{{ARTICLE_HERO_IMAGE}}', heroImg)
       .replace('{{ARTICLE_BODY}}', bodyHtml)
       .replace('{{SOURCE_ATTRIBUTION}}', sourceAttribution)
@@ -1532,17 +1580,36 @@ async function main() {
   await fillMissingImages(articles);
   log('');
 
-  // 3. Rewrite ALL titles to English editorial style
+  // 3. Rewrite ALL titles to English editorial style (with deduplication)
   log('Rewriting titles to English editorial style...');
   let rewritten = 0;
+  const usedTitles = new Set();
   for (const article of articles) {
     const original = article.title;
     article.originalTitle = original;
     article.topic = classifyTopic(original);
-    article.title = rewriteTitle(original, article.source);
+    // Attempt up to 15 times to get a unique title
+    let candidate = rewriteTitle(original, article.source);
+    let attempts = 0;
+    while (usedTitles.has(candidate) && attempts < 15) {
+      candidate = rewriteTitle(original, article.source);
+      attempts++;
+    }
+    // If still duplicate after 15 attempts, append a distinguishing suffix
+    if (usedTitles.has(candidate)) {
+      const artist = extractArtist(original);
+      const suffix = artist ? ` — ${article.source} Report` : ` (${article.source})`;
+      candidate = candidate + suffix;
+      // If STILL duplicate, add index
+      if (usedTitles.has(candidate)) {
+        candidate = candidate + ` #${usedTitles.size + 1}`;
+      }
+    }
+    usedTitles.add(candidate);
+    article.title = candidate;
     if (article.title !== original) rewritten++;
   }
-  log(`  Rewritten ${rewritten}/${articles.length} titles`);
+  log(`  Rewritten ${rewritten}/${articles.length} titles (all unique)`);
   log('');
 
   // 3.5 Backdate articles to spread across Jan-Mar 2026
