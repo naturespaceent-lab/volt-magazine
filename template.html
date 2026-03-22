@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOLT | K-POP Breaking News</title>
+  <meta name="description" content="K-POP breaking news, music reviews, charts, and culture.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    h1, h2, h3, .site-logo { font-family: Georgia, 'Times New Roman', serif; }
+    a { text-decoration: none; color: inherit; }
+    a:hover { color: #cc0000; }
+    img { display: block; }
+  </style>
+</head>
+<body class="bg-white text-gray-800">
+
+  <!-- HEADER -->
+  <header class="bg-neutral-900 border-b-2 border-red-700">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="site-logo text-white text-2xl font-bold tracking-wide">VOLT</a>
+      <button id="menuBtn" class="md:hidden text-white text-xl leading-none">&#9776;</button>
+      <nav id="navMenu" class="hidden md:flex gap-6">
+        <a href="#" class="text-xs font-bold tracking-widest uppercase text-gray-300 hover:text-white">News</a>
+        <a href="#" class="text-xs font-bold tracking-widest uppercase text-gray-300 hover:text-white">Music</a>
+        <a href="#" class="text-xs font-bold tracking-widest uppercase text-gray-300 hover:text-white">Charts</a>
+        <a href="#" class="text-xs font-bold tracking-widest uppercase text-gray-300 hover:text-white">Culture</a>
+      </nav>
+    </div>
+    <!-- Mobile nav -->
+    <div id="mobileNav" class="hidden md:hidden bg-neutral-800 border-t border-neutral-700">
+      <div class="max-w-5xl mx-auto px-4 py-2 flex flex-col gap-2">
+        <a href="#" class="text-xs font-bold tracking-widest uppercase text-gray-300 py-1">News</a>
+        <a href="#" class="text-xs font-bold tracking-widest uppercase text-gray-300 py-1">Music</a>
+        <a href="#" class="text-xs font-bold tracking-widest uppercase text-gray-300 py-1">Charts</a>
+        <a href="#" class="text-xs font-bold tracking-widest uppercase text-gray-300 py-1">Culture</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4">
+
+    <!-- TOP STORY -->
+    <section class="py-6 border-b border-gray-200">
+      <span class="text-xs font-bold uppercase text-red-700">{{HERO_CATEGORY}}</span>
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mt-1">{{HERO_TITLE}}</h1>
+      <p class="text-sm text-gray-500 mt-2">{{HERO_DATE}} &mdash; Source: {{HERO_SOURCE}}</p>
+      <img
+        src="{{HERO_IMAGE}}"
+        alt=""
+        width="960"
+        height="540"
+        class="w-full mt-4 object-cover"
+        style="max-height: 480px;"
+        data-fallback="https://picsum.photos/seed/volt-hero-fallback/960/540"
+        onerror="if(!this.dataset.failed){this.dataset.failed='1';this.src=this.dataset.fallback}"
+        referrerpolicy="no-referrer"
+      >
+    </section>
+
+    <!-- TRENDING -->
+    <section class="py-6 border-b border-gray-200">
+      <h2 class="text-lg font-bold text-gray-900 uppercase border-l-4 border-red-700 pl-3 mb-4">Trending</h2>
+      <ol class="list-decimal list-inside space-y-2">
+        {{TRENDING_ITEMS}}
+      </ol>
+    </section>
+
+    <!-- LATEST -->
+    <section class="py-6 border-b border-gray-200">
+      <h2 class="text-lg font-bold text-gray-900 uppercase border-l-4 border-red-700 pl-3 mb-4">Latest</h2>
+      <div class="divide-y divide-gray-200">
+        {{LATEST_ARTICLES}}
+      </div>
+    </section>
+
+    <!-- CHARTS & DATA -->
+    <section class="py-6 border-b border-gray-200">
+      <h2 class="text-lg font-bold text-gray-900 uppercase border-l-4 border-red-700 pl-3 mb-4">Charts &amp; Data</h2>
+      <div class="divide-y divide-gray-100">
+        {{CHART_ITEMS}}
+      </div>
+    </section>
+
+    <!-- DEEP CUTS -->
+    <section class="py-6">
+      <h2 class="text-lg font-bold text-gray-900 uppercase border-l-4 border-red-700 pl-3 mb-4">Deep Cuts</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{DEEP_CUTS}}
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-neutral-900 text-gray-400 mt-8">
+    <div class="max-w-5xl mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div class="site-logo text-white text-lg font-bold">VOLT</div>
+          <div class="text-xs mt-1">&copy; 2017&ndash;2026 VOLT. All rights reserved.</div>
+        </div>
+        <nav class="flex gap-4 text-xs">
+          <a href="#" class="hover:text-white">About</a>
+          <a href="#" class="hover:text-white">Advertise</a>
+          <a href="#" class="hover:text-white">Contact</a>
+          <a href="#" class="hover:text-white">Terms</a>
+          <a href="#" class="hover:text-white">Privacy</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var btn = document.getElementById('menuBtn');
+      var nav = document.getElementById('mobileNav');
+      if (btn && nav) {
+        btn.addEventListener('click', function() {
+          nav.classList.toggle('hidden');
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>
