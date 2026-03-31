@@ -1,7 +1,7 @@
 name: Daily Crawl
 on:
   schedule:
-    - cron: '0 20 * * *'
+    - cron: '27 4 * * *'
   workflow_dispatch:
 permissions:
   contents: write
@@ -32,3 +32,8 @@ jobs:
           git add -A index.html articles/ images/ _headers
           git diff --staged --quiet || git commit -m "chore: daily crawl $(date +%Y-%m-%d)"
           git push
+      - name: Deploy to Vercel
+        continue-on-error: true
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel --yes --prod --token $VERCEL_TOKEN
